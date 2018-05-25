@@ -3,18 +3,18 @@ $(document).ready(function () {
         $('.modal').modal('show');
     }
 
-    $(document).on('click', '.editLink', function (event) {
+    $(document).on('click', '.editLinkForComment', function (event) {
         openDialog();
         $.get(this.href, function (data) {
-            $('#blogEdit').html(data);
+            $('#commentEdit').html(data);
         });
         event.preventDefault();
     });
 
     $(document).on('submit', '[data-formtype="ajaxForm"]', function (event) {
         $.post(this.action, $(this).serialize(), function (data) {
-            if (data === "OK") document.location.reload(true);
-            else $('#blogEdit').html(data);
+            if (data === "OK") document.location.reload();
+            else $('#commentEdit').html(data);
         });
         event.preventDefault();
     });

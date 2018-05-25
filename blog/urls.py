@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^new/', login_required(NewBlog.as_view()), name='new_blog'),
     url(r'^(?P<ident>\d+)/new/$', login_required(NewPost.as_view()), name='new_post'),
     url(r'^post/(?P<ident>\d+)/like/$', PostLikeAjaxView.as_view(), name='post_ajax_like'),
+    url(r'^post/(?P<pk>\d+)/comments/(?P<c_id>\d+)$', EditComment.as_view(), name='edit_comment'),
 ]

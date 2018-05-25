@@ -1,5 +1,5 @@
 function updateComments() {
-    $.get(document.URL + "comments/", function (data) {
+    $.get(document.URL + "comments", function (data) {
         $("#tag_comments").replaceWith(data);
     });
 };

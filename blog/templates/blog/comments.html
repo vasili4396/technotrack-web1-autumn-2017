@@ -1,5 +1,5 @@
 <div id="tag_comments">
-    {% for comment in post.comments.all%}
+    {% for comment in post.comments.all %}
         <ol>
             <em>{{forloop.counter}}. </em>
                 <strong>
@@ -13,6 +13,9 @@
                     <strong>
                     {{ comment.createdata }}
                     </strong>
+                    {% if user.id == comment.author.id %}
+                        <a class="editLinkForComment" href="{% url "blog:edit_comment" pk=post.id c_id=comment.id%}"> Edit </a>
+                    {% endif %}
                 </div>
         </ol>
     {% endfor %}

@@ -6,7 +6,7 @@ from django import forms
 from comment.models import Comment
 
 
-class BlogForm(forms.ModelForm):
+class BlogForm(forms.Form):
     search = forms.CharField(required=False)
     order_by = forms.ChoiceField(choices=(
         ('name', 'A->Z'),
@@ -14,10 +14,6 @@ class BlogForm(forms.ModelForm):
         ('-createdata', 'Last created in the beg'),
         ('createdata', 'Last created in the end'),
     ), required=False)
-
-    class Meta:
-        model = Blog
-        fields = 'name',
 
 
 class BlogList(ListView):
@@ -43,8 +39,6 @@ class BlogList(ListView):
         bdict.pop('page', None)
         from urllib.parse import urlencode
         context['querypart'] = urlencode(bdict)
-        for blogs in context['blog']:
-            blogs.form = BlogForm(instance=blogs)
 
         return context
 
@@ -209,6 +203,38 @@ class PostLikeAjaxView(View):
 
     def post(self, request, *args, **kwargs):
         if not self.request.user.is_authenticated() or not self.post_object.likes.filter(author=self.request.user).exists():
-            b2 = Like(author=self.request.user, post=self.post_object)
+            b2 = Like(id=15, author=self.request.user, post=self.post_object)
             b2.save()
-            return HttpResponse(Like.objects.filter(post=self.post_object).count())
+        elif self.post_object.likes.filter(author=self.request.user).exists():
+            like = Like.objects.get(author_id=self.request.user.id, post_id=self.post_object.id)
+            like.delete()
+        likes_count = Like.objects.filter(post=self.post_object).count()
+        message = str(likes_count) + " likes"
+        return HttpResponse(message)
+
+
+class EditComment(UpdateView):
+    template_name = 'blog/edit_comment.html'
+    model = Comment
+    fields = ['text', ]
+
+    def get_object(self, queryset=None):
+        return Comment.objects.get(id=self.kwargs['c_id'], post_id=self.kwargs['pk'])
+
+    def form_valid(self, form):
+        if self.object.author == self.request.user:
+            super(EditComment, self).form_valid(form)
+            return HttpResponse("OK")
+        else:
+            return HttpResponseRedirect(404)
+
+    def get_context_data(self, **kwargs):
+        self.postobject = get_object_or_404(Post, id=self.kwargs['pk'])
+        context = super(EditComment, self).get_context_data(**kwargs)
+        context['post'] = self.postobject
+        return context
+
+    def get_success_url(self):
+        return reverse('blog:concretePost', kwargs={'ident': self.object.post_id})
+
+
